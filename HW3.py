@@ -3,10 +3,12 @@
 # Email: hfparker@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
 # If you worked with generative AI also add a statement for how you used it.
-# e.g.:
+#i used generative ai in formatting my lists and in debugging some of my code, and in using the git to push and clear up some issues with my directorys.
 # Asked ChatGPT hints for debugging and suggesting the general structure of the code
 # Did your use of GenAI on this assignment align with your goals and guidelines in
 #    your Gen AI contract? If not, why?
+##honestly i really needed the ai at the end when i was trying to get the website to synch with my file, but overall it does adhere. 
+
 
 from os import name
 import random

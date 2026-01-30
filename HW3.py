@@ -1,13 +1,14 @@
-# Name:
-# Student ID:
-# Email:
+# Name: Henry Parker
+# Student ID: hfparker
+# Email: hfparker@umich.edu
 # Who or what you worked with on this homework (including generative AI like ChatGPT):
 # If you worked with generative AI also add a statement for how you used it.
 # e.g.:
 # Asked ChatGPT hints for debugging and suggesting the general structure of the code
-# Did your use of GenAI on this assignment align with your goals and guidelines in 
+# Did your use of GenAI on this assignment align with your goals and guidelines in
 #    your Gen AI contract? If not, why?
 
+from os import name
 import random
 import io
 from contextlib import redirect_stdout
@@ -32,8 +33,9 @@ class CouponDispenser:
         Args:
             coupon_cards (list[str]): list of possible coupons users can receive.
         """
-        # TODO: Implement per instructions
-        pass
+        self.coupon_cards = coupon_cards
+        self.customer_roster = []
+        self.issued_indices = []
 
     def __str__(self):
         """
@@ -43,8 +45,17 @@ class CouponDispenser:
         Returns:
             str
         """
-        # TODO: Implement per instructions
-        pass
+        if len(self.coupon_cards) == 0:
+            return ""
+
+        result = ""
+        i = 0
+        while i < len(self.coupon_cards):
+            result = result + self.coupon_cards[i]
+            if i != len(self.coupon_cards) - 1:
+                result = result + "|"
+            i = i + 1
+        return result
 
     def issue_coupon(self, name):
         """
@@ -60,26 +71,70 @@ class CouponDispenser:
         Returns:
             str: message as described above
         """
-        # TODO: Implement per instructions
-        pass
+        if len(self.coupon_cards) == 0:
+            return "The box is empty."
+
+        i = 0
+        while i < len(self.customer_roster):
+            if self.customer_roster[i] == name:
+                coupon_index = self.issued_indices[i]
+                coupon_text = self.coupon_cards[coupon_index]
+                return "That name already has a coupon:" + coupon_text
+            i = i + 1
+
+        coupon_index = random.randrange(len(self.coupon_cards))
+        self.customer_roster.append(name)
+        self.issued_indices.append(coupon_index)
+        return self.coupon_cards[coupon_index]
 
     def distribute_session(self):
         """
         Run the "coupon dispenser" session.
 
-        The program will loop asking you to enter a customer name (or names), show, or exit.  
-        - If you type exit (exact spelling) the program will print "Goodbye!" and stop.  
+        The program will loop asking you to enter a customer name (or names), show, or exit.
+        - If you type exit (exact spelling) the program will print "Goodbye!" and stop.
         - If you enter one or more customer names (separated by commas).
-           * A coupon will be picked at random from a list of coupons for each name 
-           if that name doesn't already have an assigned coupon. 
+           * A coupon will be picked at random from a list of coupons for each name
+           if that name doesn't already have an assigned coupon.
         - If you type show (exact spelling) it will display a string with each customer's name and coupon.
 
         See the instructions for more details.
 
         Reminder: Use lists only (no dictionaries).
         """
-        # TODO: Implement per instructions 
-        pass
+        round_num = 1
+
+        while True:
+            user_input = input(
+                "Round " + str(round_num) +
+                " - Enter a name (or a comma-separated list), or type 'show' or 'exit': "
+            )
+
+            if user_input == "exit":
+                print("Goodbye!")
+                break
+
+            if user_input == "show":
+                i = 0
+                while i < len(self.customer_roster):
+                    customer_name = self.customer_roster[i]
+                    coupon_index = self.issued_indices[i]
+                    coupon_text = self.coupon_cards[coupon_index]
+                    print(customer_name + ": " + coupon_text)
+                    i = i + 1
+                round_num = round_num + 1
+                continue
+
+            parts = user_input.split(",")
+
+            i = 0
+            while i < len(parts):
+                customer_name = parts[i].strip()
+                if customer_name != "":
+                    print(self.issue_coupon(customer_name))
+                i = i + 1
+
+            round_num = round_num + 1
 
     def tally_distribution(self):
         """
@@ -96,11 +151,29 @@ class CouponDispenser:
         Returns:
             None
         """
-        # TODO: Implement per instructions
-        pass
+        if len(self.issued_indices) == 0:
+            print("Empty")
+            return
+
+        counts = []
+        i = 0
+        while i < len(self.coupon_cards):
+            counts.append(0)
+            i = i + 1
+
+        i = 0
+        while i < len(self.issued_indices):
+            idx = self.issued_indices[i]
+            counts[idx] = counts[idx] + 1
+            i = i + 1
+
+        i = 0
+        while i < len(self.coupon_cards):
+            print(self.coupon_cards[i] + " distribution count: " + str(counts[i]) + ".")
+            i = i + 1
 
 
-def main():
+
     """
     Driver function:
       - Define the coupon_cards list (example coupons below)
@@ -108,19 +181,11 @@ def main():
       - Start the interaction via distribute_session()
       - After exit, call tally_distribution() to print the distribution in the terminal
     """
-    coupon_cards = [
-        "10% off",
-        "Free small coffee",
-        "Buy 1 get 1 half off",
-        "Free extra espresso shot",
-    ]
-
-    # Uncomment the lines below as you implement each function.
-    # box = CouponDispenser(coupon_cards)
-    # box.distribute_session()
-    # box.tally_distribution()
-    pass
-
+def main():
+    coupon_cards = ["10% off", "Free small coffee", "Buy 1 get 1 half off", "Free extra espresso shot"]
+    box = CouponDispenser(coupon_cards)
+    box.distribute_session()
+    box.tally_distribution()
 
 # -----------------------
 # Tests (about 3–4 per function)
@@ -202,14 +267,14 @@ def test():
         box_empty = CouponDispenser([])
         msg_empty = box_empty.issue_coupon("Test")
         check(msg_empty == "The box is empty.", "issue_coupon: empty coupon_cards returns correct message")
-        
+
         # Test new name assignment
         random.seed(42)
         box2 = CouponDispenser(["N1", "N2"])
         msg1 = box2.issue_coupon("Ava")
         check("N" in msg1 and len(box2.customer_roster) == 1 and len(box2.issued_indices) == 1,
               "issue_coupon: assigns to new name and updates lists")
-        
+
         # Test duplicate name (re-report)
         before_len = (len(box2.customer_roster), len(box2.issued_indices))
         msg2 = box2.issue_coupon("Ava")
@@ -218,17 +283,17 @@ def test():
               "issue_coupon: duplicate name message")
         check(before_len == after_len, "issue_coupon: duplicate does not change state")
         check("N1" in msg2 or "N2" in msg2, "issue_coupon: duplicate returns existing coupon")
-        
+
         # Test name order preserved and alignment
         _ = box2.issue_coupon("Ben")
         check(box2.customer_roster == ["Ava", "Ben"], "issue_coupon: name order preserved")
-        check(len(box2.customer_roster) == len(box2.issued_indices), 
+        check(len(box2.customer_roster) == len(box2.issued_indices),
               "issue_coupon: customer_roster and issued_indices stay aligned after append")
         check(box2.customer_roster[0] == "Ava" and box2.customer_roster[1] == "Ben",
               "issue_coupon: appends new names to customer_roster correctly")
         check(len(box2.issued_indices) == 2 and all(isinstance(i, int) for i in box2.issued_indices),
               "issue_coupon: appends chosen index to issued_indices correctly")
-        
+
         # Test that different people can get the same coupon (repeats allowed)
         random.seed(999)
         box_repeat = CouponDispenser(["Coupon1"])
@@ -238,7 +303,7 @@ def test():
         check(msg_a == msg_b == "Coupon1", "issue_coupon: same coupon text returned for different people")
         check(len(box_repeat.customer_roster) == len(box_repeat.issued_indices),
               "issue_coupon: customer_roster and issued_indices aligned when repeats allowed")
-        
+
         # Test empty box message (when all coupons are used up - but this shouldn't happen now)
         # Actually, with new behavior, we can always assign coupons, so this test is removed
     except Exception as e:
@@ -339,30 +404,30 @@ def test():
         main_source = inspect.getsource(main)
         check("coupon_cards" in main_source and "=" in main_source.split("coupon_cards")[1][:50],
               "main: coupon_cards list is properly defined")
-        
+
         # Test that main() constructs CouponDispenser
         check("CouponDispenser" in main_source and "(" in main_source.split("CouponDispenser")[1][:20],
               "main: CouponDispenser is properly constructed")
-        
+
         # Test that main() calls distribute_session
         check("distribute_session" in main_source and "()" in main_source.split("distribute_session")[1][:10],
               "main: distribute_session is called correctly")
-        
+
         # Test that main() calls tally_distribution (extra credit)
         check("tally_distribution" in main_source and "()" in main_source.split("tally_distribution")[1][:10],
               "main: tally_distribution is called correctly (extra credit)")
-        
+
         # Test actual execution of main() with captured output
         buf_main = io.StringIO()
         it_main = iter(["exit"])  # Just exit immediately
-        
+
         def fake_input_main(prompt=""):
             print(prompt, end="", file=buf_main)
             try:
                 return next(it_main)
             except StopIteration:
                 return "exit"
-        
+
         original_input_main = __builtins__.input
         try:
             __builtins__.input = fake_input_main
@@ -370,7 +435,7 @@ def test():
                 main()
         finally:
             __builtins__.input = original_input_main
-        
+
         main_output = buf_main.getvalue()
         check("Round 1" in main_output, "main: distribute_session is executed")
         check("Goodbye!" in main_output, "main: session runs and exits correctly")
@@ -389,7 +454,7 @@ def test():
         with redirect_stdout(buf_tally_main):
             box_tally_main.tally_distribution()
         tally_output = buf_tally_main.getvalue()
-        check("distribution count:" in tally_output, 
+        check("distribution count:" in tally_output,
               "tally_distribution: output format correct for main() display")
     except Exception as e:
         check(False, f"tally_distribution in main: unexpected exception {e}")
@@ -398,6 +463,5 @@ def test():
 
 
 if __name__ == "__main__":
-    main()
-    # test()
-
+   # main()
+     test()
